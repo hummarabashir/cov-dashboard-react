@@ -41,14 +41,14 @@ function App() {
   const [activeLocation, setActiveLocation] = useState("can");
   const [lastUpdated, setlastUpdated] = useState("");
   const [summaryData, setSummaryData] = useState({});
-  // const [timeseriesData, setTimeseriesData] = useState({
-  //     datasets: [],
-  //   });
+  const [timeseriesData, setTimeseriesData] = useState({
+    datasets: [],
+  });
 
   useEffect(() => {
     getVersion();
     getSummaryData();
-    // getTimeseriesData();
+    getTimeseriesData();
   }, [activeLocation]);
 
   const getVersion = async () => {
@@ -75,54 +75,52 @@ function App() {
     console.log(formattedData);
     setSummaryData(formattedData);
   };
-  //   const getTimeseriesData = async (location) => {
-  //     const res = await fetch(
-  //       `${baseUrl}/timeseries?loc=${activeLocation}&ymd=true`
-  //     );
+  const getTimeseriesData = async (location) => {
+    const res = await fetch(
+      `${baseUrl}/timeseries?loc=${activeLocation}&ymd=true`
+    );
 
-  // const data = await res.json();
-  // setTimeseriesData({ datasets: timeseriesDataMap(data) });
+    const data = await res.json();
+    setTimeseriesData({ datasets: timeseriesDataMap(data) });
+  };
+  function timeseriesDataMap(fetchedData) {
+    let tsKeyMap = [
+      {
+        datasetLabel: "active",
+        dataKey: "active_cases",
+        dateKey: "date_active",
+        borderColor: "red",
+      },
+      {
+        datasetLabel: "mortality",
+        dataKey: "cumulative_deaths",
+        dateKey: "date_death_report",
+        borderColor: "grey",
+      },
+      {
+        datasetLabel: "recovered",
+        dataKey: "recovered",
+        dateKey: "date_recovered",
+        borderColor: "blue",
+      },
+    ];
 
-  //   };
-  //   function timeseriesDataMap(fetchedData) {
-  //     let tsKeyMap = [
-  //       {
-  //         datasetLabel: "active",
-  //         dataKey: "active_cases",
-  //         dateKey: "date_active",
-  //         borderColor: "red",
-  //       },
-  //       {
-  //         datasetLabel: "mortality",
-  //         dataKey: "cumulative_deaths",
-  //         dateKey: "date_death_report",
-  //         borderColor: "grey",
-  //       },
-  //       {
-  //         datasetLabel: "recovered",
-  //         dataKey: "recovered",
-  //         dateKey: "date_recovered",
-  //         borderColor: "blue",
-  //       },
-  //     ];
-
-  // let datasets = [];
-  // tsKeyMap.forEach((dataSeries) => {
-  //   let dataset = {
-  //     label: dataSeries.datasetLabel,
-  //     borderColor: dataSeries.borderColor,
-  //     data: fetchedData[dataSeries.datasetLabel].map((dataPoint) => {
-  //       return {
-  //         y: dataPoint[dataSeries.dataKey],
-  //         x: dataPoint[dataSeries.dateKey],
-  //       };
-  //     }),
-  //   };
-  //   datasets.push(dataset);
-  // });
-  // return datasets;
-
-  //   }
+    let datasets = [];
+    tsKeyMap.forEach((dataSeries) => {
+      let dataset = {
+        label: dataSeries.datasetLabel,
+        borderColor: dataSeries.borderColor,
+        data: fetchedData[dataSeries.datasetLabel].map((dataPoint) => {
+          return {
+            y: dataPoint[dataSeries.dataKey],
+            x: dataPoint[dataSeries.dateKey],
+          };
+        }),
+      };
+      datasets.push(dataset);
+    });
+    return datasets;
+  }
   return (
     <div className="App">
       <h1>COVID 19 Dashboard </h1>
@@ -138,16 +136,14 @@ function App() {
             )}
             className="dashboard-select"
           />
-          <p classNa me="update-date">
-            Last Updated : {lastUpdated}
-          </p>
+          <p className="update-date">Last Updated : {lastUpdated}</p>
         </div>
         <div className="dashboard-timeseries">
-          {/* <Line
+          <Line
             data={timeseriesData}
             options={timeseriesOptions}
             className="line-chart"
-          /> */}
+          />
         </div>
         <div className="dashboard-summary">
           <Card title="Total Cases" value={summaryData.cases} />
